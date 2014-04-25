@@ -357,7 +357,7 @@ int main( int argc, char *argv[] ){
 	  //printf( "%4.3f ", Pressure );
 	}
 	//printf( "\n" );
-	//printf( "%s\n", buffer );
+	printf( "%s\n", buffer );
 	//break;
       }
     }
