@@ -354,10 +354,10 @@ int main( int argc, char *argv[] ){
 	  char_command = strtok( NULL, " " );
 	  Pressure = atof( char_command );
 	  setState( ch_num, Pressure ); 
-	  //printf( "%4.3f ", Pressure );
+	  printf( "%4.3f ", Pressure );
 	}
-	//printf( "\n" );
-	printf( "%s\n", buffer );
+	printf( "\n" );
+	//printf( "%s\n", buffer );
 	//break;
       }
     }
