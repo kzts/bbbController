@@ -228,30 +228,6 @@ int main(int argc, char *argv[]) {
 
   unsigned int ch_num;
   double Exhaust = 0.0;
-  /*
-  srand((unsigned)time(NULL));
-
-  struct timeval start_timeval, end_timeval, ini_loop_timeval;
-
-
-
-  if ( argc != 4){
-    printf("error: input 3 values!: valve number, pressure and time [ms]\n");
-    return 0;
-  }
-
-  int SetValve         = atoi( argv[1]);
-  double Pressure      = atof( argv[2]);
-  double Time_end_loop = atof( argv[3]); // [ms]
-
-  double elasped_time;
-  double Time_loop = 10.0; // [ms]
-
-  unsigned int SampleNum = (int) Time_end_loop/Time_loop;
-
-  int i,j,k;
-
-  */
 
   // server
   int welcomeSocket, newSocket;
@@ -292,8 +268,6 @@ int main(int argc, char *argv[]) {
   //wait
   //usleep(500000);  
  
-
- 
   // ****************************************
   // loop
   // ****************************************
@@ -328,43 +302,6 @@ int main(int argc, char *argv[]) {
     //usleep(100000);
   }
 
-
-  /*
-  gettimeofday( &start_timeval, NULL );
-
-  for (i = 0; i < SampleNum; i++){ 
-    gettimeofday( &ini_loop_timeval, NULL );
-    
-    //for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
-    //setState(ch_num, Exhaust);     
-    //setState( SetValve, Pressure);
-
-    for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++){
-      if (ch_num == SetValve){      
-	setState( ch_num, Pressure);     
-      }else{
-	setState( ch_num, Exhaust);     
-      }
-    }
-
-    // wait          
-    gettimeofday( &end_timeval, NULL );
-    elasped_time = 1000.0*(end_timeval.tv_sec - ini_loop_timeval.tv_sec)
-      + (end_timeval.tv_usec - ini_loop_timeval.tv_usec) / 1000.0;
-    while ( elasped_time < Time_loop){
-      gettimeofday( &end_timeval, NULL );
-      elasped_time = 1000.0*(end_timeval.tv_sec - ini_loop_timeval.tv_sec)
-	+ (end_timeval.tv_usec - ini_loop_timeval.tv_usec) / 1000.0;
-      //printf("elasped time: %f \n", elasped_time); 
-    }
-
-    elasped_time = 1000.0*(end_timeval.tv_sec - start_timeval.tv_sec)
-      + (end_timeval.tv_usec - start_timeval.tv_usec) / 1000.0;
-    //printf("elasped time: %f, i: %d \n", elasped_time, i); 
-    if ( elasped_time > Time_end_loop)
-      break;
-  }
-  */
   // termination
   for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
     setState(ch_num, Exhaust); 
