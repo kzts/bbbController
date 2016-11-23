@@ -1,3 +1,4 @@
+#import os
 import sys
 import subprocess
 
@@ -12,8 +13,22 @@ for i in range( 3, len(sys.argv) ):
     cmd = cmd + ' ' + sys.argv[i]
 
 for i in range( 0, num ):
-    #proc1 = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    proc1 = subprocess.call( cmd, shell=True )
-    print cmd
+    print "#" + "{0:03d}".format(i+1) + ": " + cmd    
+    subprocess.call( cmd, shell=True )    
+    #os.system(cmd)
+    #proc = subprocess.Popen( cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    #out   = proc1.communicate()
+    #lines = out.split('\n')    
+    #line = proc.stdout.readline()
+    #print line
+    #proc1.wait()
+    #for j in range( 0, len(lines) ):
+    #    print lines[j]    
+    #proc1.terminate()
+    
+    #proc = subprocess.call( cmd, shell=True )
+
+    
+
 
 
