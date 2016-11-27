@@ -8,21 +8,24 @@
 #include <stdbool.h>
 #include <time.h>
 #include <string.h>
-
+// socket
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+// ip
+#include <unistd.h> /* for close */
+#include <sys/types.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 
-
-// for valves
+//  valves
 #define pin_spi_cs1  P9_16 // 1_19=51
 #define pin_spi_other P9_22 // 0_2=2
 #define pin_spi_mosi P9_30 // 3_15=112
 #define pin_spi_sclk P9_21 // 0_3=3
 #define pin_spi_cs2  P9_42 // 0_7 =7
 #define NUM_OF_CHANNELS 16
-
-// for sensors
+// sensors
 #define pin_din_sensor  P9_11 // 0_30=30
 #define pin_clk_sensor P9_12 // 1_28=60
 #define pin_cs_sensor P9_13 // 0_31=31
@@ -31,8 +34,7 @@
 #define NUM_ADC_PORT 8
 #define NUM_ADC 2
 
-
-/**** SPI for valves ****/
+// SPI for valves
 bool clock_edge = false;
 unsigned short resolution = 0x0FFF;
 void set_SCLK(bool value) { digitalWrite(pin_spi_sclk, value); }
@@ -217,18 +219,71 @@ void init_sensor(void) {
 	set_CS_SENSOR(false);
 }
 
+char* getIP(void){
+  int fd;
+  struct ifreq ifr;
 
+  fd = socket(AF_INET, SOCK_DGRAM, 0);
+  ifr.ifr_addr.sa_family = AF_INET; // IPv4 IP address
+  strncpy(ifr.ifr_name, "eth0", IFNAMSIZ-1);   // eth0 IP address
+  ioctl(fd, SIOCGIFADDR, &ifr);
+  close(fd);
 
-int main(int argc, char *argv[]) {
+  // printf("%s\n", inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr));
+
+  return inet_ntoa(((struct sockaddr_in *)&ifr.ifr_addr)->sin_addr);
+}
+
+int setServer(void){
+  int welcomeSocket, newSocket_;
+  struct sockaddr_in serverAddr;
+  struct sockaddr_storage serverStorage;
+  socklen_t addr_size;
+  int port_num = 7891;
+
+  char* ip_address = getIP();
+  printf("ip address: %s\n", ip_address );
+
+  welcomeSocket = socket(PF_INET, SOCK_STREAM, 0);
+  serverAddr.sin_family = AF_INET;
+  //serverAddr.sin_port = htons(7891);
+  serverAddr.sin_port = htons(port_num);
+  serverAddr.sin_addr.s_addr = inet_addr(ip_address);
+  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);
+  bind(welcomeSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
+
+  if(listen(welcomeSocket,5)==0)
+    printf("Listening\n");
+  else
+    printf("Error\n");
+
+  addr_size = sizeof serverStorage;
+  newSocket_ = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
+
+  return newSocket_;
+}
+
+void exhaustAll(){
+  int ch_num;
+  double Exhaust = 0.0;
+  for ( ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++ )
+    setState( ch_num, Exhaust ); 
+}
+
+int main( int argc, char *argv[] ){
+  /*
   if ( argc != 2 ){
     printf("input this computer's ip address.\n");
     return -1;
   }
   char* ip_address = argv[1];
-
+  */
+  
   unsigned int ch_num;
   double Exhaust = 0.0;
 
+  char buffer[99999];
+  /*
   // server
   int welcomeSocket, newSocket;
   //char buffer[1024];
@@ -252,25 +307,20 @@ int main(int argc, char *argv[]) {
 
   addr_size = sizeof serverStorage;
   newSocket = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
+  */
+  int newSocket = setServer();
 
-
-  // ****************************************
-  // initialization
-  // ****************************************
+  // initialize
   init();
   init_pins(); // ALL 5 pins are HIGH except for GND
   init_DAConvAD5328();
   init_sensor();
   
-  for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
-    setState(ch_num, Exhaust); 
+  exhaustAll();
+  //for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
+  //setState(ch_num, Exhaust); 
   
-  //wait
-  //usleep(500000);  
- 
-  // ****************************************
   // loop
-  // ****************************************
   unsigned long *tmp_val0;
   unsigned long tmp_val[NUM_ADC_PORT];
   char char_val[9];
@@ -282,9 +332,7 @@ int main(int argc, char *argv[]) {
   double elasped = 0;
   gettimeofday( &ini, NULL );  
 
-  //while( elasped < 3 ){
-  //while( elasped < 1 ){
-  while( 1 ){
+  while (1){
     // send sensor value
     strcpy( buffer, "sensor: " );
     for (j = 0; j< NUM_ADC; j++){
@@ -297,11 +345,11 @@ int main(int argc, char *argv[]) {
       }
     send( newSocket, buffer, 128, 0);
     //printf("\n");
-    //printf( "%s\n", buffer );
+    printf( "%s\n", buffer );
   
     // recieve command value
     recv( newSocket, buffer, 1024, 0);
-    //printf( "%s\n", buffer );
+    printf( "%s\n", buffer );
     if ( strlen( buffer ) != 0 ){
       char_top = strtok( buffer, " " );
       if ( strcmp( char_top, "command:" ) == 0 ){
@@ -321,17 +369,17 @@ int main(int argc, char *argv[]) {
 
     gettimeofday( &now, NULL );  
     elasped = now.tv_sec - ini.tv_sec;
-    //if ( elasped > 1 )
-    if ( elasped > 10 )
+    if ( elasped > 1 )
+    //if ( elasped > 10 )
       break;
     //printf("%lf\t", elasped_time);
-    //usleep(100000);
   }
 
-  // termination
-  for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
-    setState(ch_num, Exhaust); 
-  
+  exhaustAll();
+  // terminate
+  //for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
+  //setState(ch_num, Exhaust); 
+    
   return 0;
 }
 
