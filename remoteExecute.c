@@ -299,7 +299,7 @@ int getADCNumber(void){
 int main( int argc, char *argv[] ){
   NUM_ADC = getADCNumber();
   printf( "num of ADC: %d\n", NUM_ADC );
-  /*
+  
   unsigned int ch_num;
   double Exhaust = 0.0;
 
@@ -368,7 +368,7 @@ int main( int argc, char *argv[] ){
   }
 
   //exhaustAll();
-*/    
+    
   return 0;
 }
 
