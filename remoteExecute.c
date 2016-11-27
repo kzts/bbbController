@@ -32,7 +32,12 @@
 #define pin_dout1_sensor P9_14 // 1_18=50
 #define pin_dout2_sensor  P9_15 // 1_19=51
 #define NUM_ADC_PORT 8
-#define NUM_ADC 2
+//#define NUM_ADC 2
+unsigned int  NUM_ADC = 2;
+
+#define NUM_BUFFER 1024
+
+char filename_ADC[] = "params/ADC_NUM.dat";
 
 // SPI for valves
 bool clock_edge = false;
@@ -219,6 +224,8 @@ void init_sensor(void) {
 	set_CS_SENSOR(false);
 }
 
+
+// below my function
 char* getIP(void){
   int fd;
   struct ifreq ifr;
@@ -270,44 +277,34 @@ void exhaustAll(){
     setState( ch_num, Exhaust ); 
 }
 
-int main( int argc, char *argv[] ){
-  /*
-  if ( argc != 2 ){
-    printf("input this computer's ip address.\n");
-    return -1;
+int getADCNumber(void){
+  FILE *fp;
+  char val[NUM_BUFFER];
+
+  fp = fopen( filename_ADC, "r" );
+
+  if ( fp == NULL ){
+    printf("File open error (ADC)\n");
+    return;
   }
-  char* ip_address = argv[1];
-  */
-  
+
+  fgets( val, sizeof(val), fp );
+  int NUM_ADC_ = atoi(val);
+
+  fclose(fp);
+
+  return NUM_ADC_;
+}
+
+int main( int argc, char *argv[] ){
+  NUM_ADC = getADCNumber();
+  printf( "num of ADC: %d\n", NUM_ADC );
+  /*
   unsigned int ch_num;
   double Exhaust = 0.0;
 
-  char buffer[99999];
-  /*
-  // server
-  int welcomeSocket, newSocket;
-  //char buffer[1024];
-  char buffer[99999];
-  struct sockaddr_in serverAddr;
-  struct sockaddr_storage serverStorage;
-  socklen_t addr_size;
-
-  welcomeSocket = socket(PF_INET, SOCK_STREAM, 0);
-  serverAddr.sin_family = AF_INET;
-  serverAddr.sin_port = htons(7891);
-  //serverAddr.sin_addr.s_addr = inet_addr("192.168.2.247");
-  serverAddr.sin_addr.s_addr = inet_addr(ip_address);
-  memset(serverAddr.sin_zero, '\0', sizeof serverAddr.sin_zero);  
-  bind(welcomeSocket, (struct sockaddr *) &serverAddr, sizeof(serverAddr));
-
-  if(listen(welcomeSocket,5)==0)
-    printf("Listening\n");
-  else
-    printf("Error\n");
-
-  addr_size = sizeof serverStorage;
-  newSocket = accept(welcomeSocket, (struct sockaddr *) &serverStorage, &addr_size);
-  */
+  //char buffer[99999];
+  char buffer[NUM_BUFFER];
   int newSocket = setServer();
 
   // initialize
@@ -317,39 +314,37 @@ int main( int argc, char *argv[] ){
   init_sensor();
   
   exhaustAll();
-  //for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
-  //setState(ch_num, Exhaust); 
   
   // loop
   unsigned long *tmp_val0;
   unsigned long tmp_val[NUM_ADC_PORT];
-  char char_val[9];
+  char char_val[12];
   char *char_top, *char_command;
   double Pressure;
-
   int j, k;
-  struct timeval ini, now;
-  double elasped = 0;
-  gettimeofday( &ini, NULL );  
+  //struct timeval ini, now;
+  //double elasped = 0;
+  //gettimeofday( &ini, NULL );  
 
   while (1){
     // send sensor value
     strcpy( buffer, "sensor: " );
-    for (j = 0; j< NUM_ADC; j++){
+    for ( j = 0; j< NUM_ADC; j++){
       tmp_val0 = read_sensor(j,tmp_val);
-      for (k = 0; k< NUM_ADC_PORT; k++){
+      for ( k = 0; k< NUM_ADC_PORT; k++){
 	//printf("%d\t", tmp_val0[k]);
 	sprintf( char_val, "%d ", tmp_val0[k] );
 	strcat( buffer, char_val );
       }
-      }
-    send( newSocket, buffer, 128, 0);
+    }
+    //send( newSocket, buffer, 128, 0);
+    send( newSocket, buffer, NUM_BUFFER, 0);
     //printf("\n");
-    printf( "%s\n", buffer );
+    //printf( "%s\n", buffer );
   
     // recieve command value
-    recv( newSocket, buffer, 1024, 0);
-    printf( "%s\n", buffer );
+    recv( newSocket, buffer, NUM_BUFFER, 0);
+    //printf( "%s\n", buffer );
     if ( strlen( buffer ) != 0 ){
       char_top = strtok( buffer, " " );
       if ( strcmp( char_top, "command:" ) == 0 ){
@@ -359,27 +354,21 @@ int main( int argc, char *argv[] ){
 	  char_command = strtok( NULL, " " );
 	  Pressure = atof( char_command );
 	  setState( ch_num, Pressure ); 
-	  printf( "%4.3f ", Pressure );
+	  //printf( "%4.3f ", Pressure );
 	}
-	printf( "\n" );
+	//printf( "\n" );
 	//printf( "%s\n", buffer );
 	//break;
       }
     }
-
-    gettimeofday( &now, NULL );  
-    elasped = now.tv_sec - ini.tv_sec;
-    if ( elasped > 1 )
-    //if ( elasped > 10 )
-      break;
-    //printf("%lf\t", elasped_time);
+    //gettimeofday( &now, NULL );  
+    //elasped = now.tv_sec - ini.tv_sec;
+    //if ( elasped > 1 )
+    //break;
   }
 
-  exhaustAll();
-  // terminate
-  //for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++)
-  //setState(ch_num, Exhaust); 
-    
+  //exhaustAll();
+*/    
   return 0;
 }
 
