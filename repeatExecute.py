@@ -2,15 +2,18 @@
 import sys
 import subprocess
 
-if len(sys.argv) < 4:
-    print 'input: execute file, repeat number and comamnd line arguments.'
+if len(sys.argv) == 3:
+    print 'input: execute file and repeat number'
     sys.exit()
+#if len(sys.argv) < 4:
+#    print 'input: execute file, repeat number and comamnd line arguments.'
+#    sys.exit()
 
 cmd = sys.argv[1] + ' '
 num = int( sys.argv[2] )
 
-for i in range( 3, len(sys.argv) ):
-    cmd = cmd + ' ' + sys.argv[i]
+#for i in range( 3, len(sys.argv) ):
+#    cmd = cmd + ' ' + sys.argv[i]
 
 for i in range( 0, num ):
     print "#" + "{0:03d}".format(i+1) + ": " + cmd    
