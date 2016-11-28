@@ -326,6 +326,8 @@ int main( int argc, char *argv[] ){
   //double elasped = 0;
   //gettimeofday( &ini, NULL );  
 
+  strcpy( buffer, "ready" );
+  send( newSocket, buffer, 5, 0 );
   while (1){
     // send sensor value
     strcpy( buffer, "sensor: " );
