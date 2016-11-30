@@ -9,7 +9,7 @@ pressure_low   = 0.03
 pressure_range = 0.3
 pressure1 = pressure_low;
 pressure2 = pressure_low;
-wait_time = 2
+wait_time = 1
 
 # repeat num
 if len(sys.argv) != 2:
