@@ -36,7 +36,14 @@
 //unsigned int  NUM_ADC = 2;
 //#define NUM_BUFFER 1024
 
-struct timeval ini, now;
+#define SWITCH_TIME1 1000
+#define SWITCH_TIME2 1300
+#define SWITCH_TIME3 2300
+
+#define NUM 10000
+#define NUM_OUT 4
+#define EXHAUST 0.0
+struct timeval ini_t, now_t;
 double time0[NUM];
 unsigned long data_sensors[NUM][NUM_ADC][NUM_ADC_PORT] = {};
 
@@ -231,9 +238,8 @@ void init_sensor(void) {
 // below my function
 void exhaustAll(){
   int ch_num;
-  double Exhaust = 0.0;
   for ( ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++ )
-    setState( ch_num, Exhaust ); 
+    setState( ch_num, EXHAUST ); 
 }
 
 void saveDat(void){
@@ -282,82 +288,67 @@ double getElaspedTime(void){
 
 
 int main( int argc, char *argv[] ){
-  //NUM_ADC = getADCNumber();
-  //printf( "num of ADC: %d\n", NUM_ADC );
-  
-  unsigned int ch_num;
-  double Exhaust = 0.0;
-
-  //char buffer[99999];
-  //char buffer[NUM_BUFFER];
-  //int newSocket = setServer();
+  // get pressure
+  if ( argc != NUM_OUT + 1 ){
+    printf("input %d value.", NUM_OUT );
+  }
+  double Pressure = [NUM_OUT];
+  int i;
+  for ( i = 0; i < NUM_OUT; i++ ){
+    Pressure[i] = atof( argc[i] );
+  }
 
   // initialize
   init();
   init_pins(); // ALL 5 pins are HIGH except for GND
   init_DAConvAD5328();
   init_sensor();
-  
+  gettimeofday( &ini_t, NULL );
   exhaustAll();
   
   // loop
   unsigned long *tmp_val0;
   unsigned long tmp_val[NUM_ADC_PORT];
-  char char_val[12];
-  char *char_top, *char_command;
-  double Pressure;
-  int j, k;
-  
-  //double elasped = 0;
-  //gettimeofday( &ini, NULL );  
+  unsignedint j, k, ch_num;
+  double now_time;
+  int now_phase = 0, old_phase = -1;  
 
-  //strcpy( buffer, "ready" );
-  //send( newSocket, buffer, 5, 0 );
-  while (1){
-    /*
-    // send sensor value
-    strcpy( buffer, "sensor: " );
+  for ( i = 0; i < NUM; i++ ){
+    // get now phase
+    now_time = getElaspedTime();
+    if ( now_time > SWITCH_TIME3 )
+      break;
+    else if ( now_time > SWITCH_TIME2 )
+      now_phase = 2;
+    else if ( now_time > SWITCH_TIME1 )
+      now_phase = 1;
+    else
+      now_phase = 0;
+    
+    // get time and sensor data
+    time0[i] = now_time;
     for ( j = 0; j< NUM_ADC; j++){
       tmp_val0 = read_sensor(j,tmp_val);
       for ( k = 0; k< NUM_ADC_PORT; k++){
-	//printf("%d\t", tmp_val0[k]);
-	sprintf( char_val, "%d ", tmp_val0[k] );
-	strcat( buffer, char_val );
+	data_sensonsors[i][j][k] = tmp_val[k];
       }
     }
-    //send( newSocket, buffer, 128, 0);
-    //send( newSocket, buffer, NUM_BUFFER, 0);
-    //printf("\n");
-    //printf( "%s\n", buffer );
-  */
-    /*
-    // recieve command value
-    recv( newSocket, buffer, NUM_BUFFER, 0);
-    //printf( "%s\n", buffer );
-    if ( strlen( buffer ) != 0 ){
-      char_top = strtok( buffer, " " );
-      if ( strcmp( char_top, "command:" ) == 0 ){
-	for (ch_num = 0; ch_num< NUM_OF_CHANNELS; ch_num++){
-	  //if ( strlen( buffer ) == 0 )
-	  //break;
-	  char_command = strtok( NULL, " " );
-	  Pressure = atof( char_command );
-	  setState( ch_num, Pressure ); 
-	  printf( "%4.3f ", Pressure );
-	}
-	printf( "\n" );
-	//printf( "%s\n", buffer );
-	//break;
-      }
-      }
-    */
-    //gettimeofday( &now, NULL );  
-    //elasped = now.tv_sec - ini.tv_sec;
-    //if ( elasped > 1 )
-    //break;
-  }
 
-  //exhaustAll();
+    // command valve 
+    if ( now_phase != old_phase ){
+      if ( now_phase == 1){
+	  setState( VALVE0, Pressure[0] );
+	  setState( VALVE1, Pressure[1] );
+      }else{
+	  setState( VALVE0, Pressure[2] ); 
+	  setState( VALVE1, Pressure[3] ); 
+      }
+    }
+
+    old_phase = now_phase;
+  }
+  exhaustAll();
+  saveDat();
     
   return 0;
 }
