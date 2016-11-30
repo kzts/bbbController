@@ -36,11 +36,16 @@
 //unsigned int  NUM_ADC = 2;
 //#define NUM_BUFFER 1024
 
-#define SWITCH_TIME1 1000
+//#define SWITCH_TIME1 1000
+//#define SWITCH_TIME2 1500
+//#define SWITCH_TIME3 2500
+#define SWITCH_TIME1 500
 #define SWITCH_TIME2 1500
-#define SWITCH_TIME3 2500
-#define VALVE0 1
-#define VALVE1 0
+#define SWITCH_TIME3 1900
+//#define VALVE0 1
+//#define VALVE1 0
+#define VALVE0 0
+#define VALVE1 1
 
 #define NUM 10000
 #define NUM_OUT 4
