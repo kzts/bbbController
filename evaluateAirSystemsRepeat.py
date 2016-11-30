@@ -24,9 +24,9 @@ for i in range(0,repeat_num):
     # execute
     pressure0 = pressure_range* random.random() + pressure_high
     pressure3 = pressure_range* random.random() + pressure_high
-    run_motion = "./evaluteAirSystemRepeat" + " " + "{0:.3f}".format(pressure0) + " " + "{0:.3f}".format(pressure1) + " " + "{0:.3f}".format(pressure2) + " " + "{0:.3f}".format(pressure3) 
+    run_motion = "./evaluateAirSystems" + " " + "{0:.3f}".format(pressure0) + " " + "{0:.3f}".format(pressure1) + " " + "{0:.3f}".format(pressure2) + " " + "{0:.3f}".format(pressure3) 
     print run_motion
-    #os.system(run_motion)
+    os.system(run_motion)
 
     # copy results
     d        = datetime.datetime.today()

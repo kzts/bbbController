@@ -37,8 +37,8 @@
 //#define NUM_BUFFER 1024
 
 #define SWITCH_TIME1 1000
-#define SWITCH_TIME2 1300
-#define SWITCH_TIME3 2300
+#define SWITCH_TIME2 1500
+#define SWITCH_TIME3 2500
 #define VALVE0 1
 #define VALVE1 0
 
