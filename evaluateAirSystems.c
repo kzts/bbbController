@@ -39,6 +39,8 @@
 #define SWITCH_TIME1 1000
 #define SWITCH_TIME2 1300
 #define SWITCH_TIME3 2300
+#define VALVE0 1
+#define VALVE1 0
 
 #define NUM 10000
 #define NUM_OUT 4
@@ -247,9 +249,9 @@ void saveDat(void){
   FILE *fp_res;
   //char str[NUM_BUFFER];
   char str[255];
-
+  char filename_results[] = "data/results.dat";
   // open
-  fp_res = fopen( "data/results.dat", "w" );
+  fp_res = fopen( filename_results, "w" );
   if ( fp_res == NULL ){
     printf( "File open error: %s\n", filename_results );
     return;
@@ -265,10 +267,6 @@ void saveDat(void){
         sprintf( str, "%10lu\t", data_sensors[i][j][k]);
         fputs( str, fp_res);
       }
-    }
-    for (j = 0; j < NUM_OF_CHANNELS; j++){
-      sprintf( str, "%10lf\t", data_valves[i][j]);
-      fputs( str, fp_res);
     }
     sprintf( str, "\n");
     fputs(str, fp_res);
@@ -289,15 +287,16 @@ double getElaspedTime(void){
 
 int main( int argc, char *argv[] ){
   // get pressure
-  if ( argc != NUM_OUT + 1 ){
-    printf("input %d value.", NUM_OUT );
+  if ( argc != (NUM_OUT + 1) ){
+    printf("input %d value\n.", NUM_OUT );
+    return -1;
   }
-  double Pressure = [NUM_OUT];
+  double Pressure[NUM_OUT];
   int i;
   for ( i = 0; i < NUM_OUT; i++ ){
-    Pressure[i] = atof( argc[i] );
+    Pressure[i] = atof( argv[i+1] );
   }
-
+  printf("Pressure: %lf,\t%lf,\t%lf,\t%lf,\n", Pressure[0],Pressure[1],Pressure[2],Pressure[3]);
   // initialize
   init();
   init_pins(); // ALL 5 pins are HIGH except for GND
@@ -305,11 +304,10 @@ int main( int argc, char *argv[] ){
   init_sensor();
   gettimeofday( &ini_t, NULL );
   exhaustAll();
-  
   // loop
   unsigned long *tmp_val0;
   unsigned long tmp_val[NUM_ADC_PORT];
-  unsignedint j, k, ch_num;
+  unsigned int j, k, ch_num;
   double now_time;
   int now_phase = 0, old_phase = -1;  
 
@@ -324,13 +322,14 @@ int main( int argc, char *argv[] ){
       now_phase = 1;
     else
       now_phase = 0;
+    //printf("%d\t%lf\n",now_phase,now_time);
     
     // get time and sensor data
     time0[i] = now_time;
     for ( j = 0; j< NUM_ADC; j++){
       tmp_val0 = read_sensor(j,tmp_val);
       for ( k = 0; k< NUM_ADC_PORT; k++){
-	data_sensonsors[i][j][k] = tmp_val[k];
+	data_sensors[i][j][k] = tmp_val[k];
       }
     }
 
