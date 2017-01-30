@@ -33,8 +33,11 @@ echo out > /sys/class/gpio/gpio31/direction
 echo 50 > /sys/class/gpio/export
 echo in > /sys/class/gpio/gpio50/direction
 
-echo 51 > /sys/class/gpio/export
-echo in > /sys/class/gpio/gpio51/direction
+echo 48 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio48/direction
+
+echo 14 > /sys/class/gpio/export
+echo in > /sys/class/gpio/gpio14/direction
 
 echo 38 > /sys/class/gpio/export
 echo out > /sys/class/gpio/gpio38/direction

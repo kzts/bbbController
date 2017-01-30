@@ -26,16 +26,19 @@
 #define pin_spi_cs2  P9_42 // 0_7 =7
 #define NUM_OF_CHANNELS 16
 // sensors
-#define pin_din_sensor  P9_11 // 0_30=30
-#define pin_clk_sensor P9_12 // 1_28=60
-#define pin_cs_sensor P9_13 // 0_31=31
-#define pin_dout1_sensor P9_14 // 1_18=50
-#define pin_dout2_sensor  P9_15 // 1_19=51
+#define pin_din_sensor    P9_11 // 0_30=30
+#define pin_clk_sensor    P9_12 // 1_28=60
+#define pin_cs_sensor     P9_13 // 0_31=31
+#define pin_dout1_sensor  P9_14 // 1_18=50
+#define pin_dout2_sensor  P9_15 // 1_16=48
+#define pin_dout3_sensor  P9_26 // 0_14=14
 #define NUM_ADC_PORT 8
 //#define NUM_ADC 2
-unsigned int  NUM_ADC = 2;
+//unsigned int  NUM_ADC = 2;
+unsigned int  NUM_ADC = 3;
 
-#define NUM_BUFFER 1024
+//#define NUM_BUFFER 1024
+#define NUM_BUFFER 2048
 
 char filename_ADC[] = "params/ADC_NUM.dat";
 
@@ -111,12 +114,14 @@ void setState(unsigned int ch, double pressure_coeff)
 void set_DIN_SENSOR(bool value) { digitalWrite(pin_din_sensor, value); }
 void set_CLK_SENSOR(bool value) { digitalWrite(pin_clk_sensor, value); }
 void set_CS_SENSOR(bool value) { digitalWrite(pin_cs_sensor, value); }
+
 int get_DOUT_SENSOR(int adc_num) { 
 	if(adc_num==0){
-		digitalRead(pin_dout1_sensor); 
-	}
-	else{
-		digitalRead(pin_dout2_sensor); 
+	  digitalRead(pin_dout1_sensor); 
+	}else if(adc_num==1){
+	  digitalRead(pin_dout2_sensor); 
+	}else{
+	  digitalRead(pin_dout3_sensor); 
 	}
 }
 
